@@ -400,3 +400,49 @@ a:hover,
 .bp-cluster:hover {
   transform: scale(1.1);
 }
+
+/* ==========================================================================
+   State polygon tooltip — dark theme
+   ========================================================================== */
+
+.bp-tooltip {
+  background-color: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--r-md) !important;
+  box-shadow: var(--shadow-4) !important;
+  padding: 0 !important;
+  color: var(--color-fg) !important;
+}
+
+.bp-tooltip::before {
+  display: none !important;
+}
+
+/* ==========================================================================
+   State aggregate bubble — national view (zoom ≤ 6)
+   ========================================================================== */
+
+.bp-state-bubble {
+  border-radius: 50%;
+  background: #0875e3;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(8, 117, 227, 0.45);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.bp-state-bubble:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(8, 117, 227, 0.6);
+}
+
+.bp-state-bubble--active {
+  background: #0562c4;
+  box-shadow: 0 0 0 3px rgba(8, 117, 227, 0.35), 0 4px 14px rgba(8, 117, 227, 0.55);
+}
