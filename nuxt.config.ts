@@ -13,6 +13,8 @@ export default defineNuxtConfig({
     public: {
       apiBase: '',
     },
+    blobUrl: '',
+    BlobReadWriteToken: '',
   },
   app: {
     head: {

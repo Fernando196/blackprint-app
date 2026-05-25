@@ -1,8 +1,9 @@
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
-
-export default defineEventHandler(() => {
-  const filePath = resolve('server/data/metricas.json')
-  const raw = readFileSync(filePath, 'utf-8')
-  return JSON.parse(raw)
+export default defineEventHandler(async () => {
+  const config = useRuntimeConfig()
+  const data = await $fetch<any[]>(`${config.blobUrl}/metricas.json`, {
+    headers: {
+      Authorization: `Bearer ${config.BlobReadWriteToken}`,
+    },
+  })
+  return data
 })

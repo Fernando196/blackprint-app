@@ -30,4 +30,5 @@ storybook-static
 
 scripts/*.csv
 scripts/*.xlsx
+scripts/*-vercel.js
 server/data/*.json

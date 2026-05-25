@@ -1,8 +1,12 @@
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
+import { PorEstado } from '../../app/types/por_estado.type'
 
-export default defineEventHandler(() => {
-  const filePath = resolve('server/data/por_estado.json')
-  const raw = readFileSync(filePath, 'utf-8')
-  return JSON.parse(raw)
+export default defineEventHandler(async () => {
+  const config = useRuntimeConfig()
+  // const filePath = resolve('server/data/por_estado.json')
+  const data = await $fetch<PorEstado[]>(`${config.blobUrl}/por_estado.json`, {
+    headers: {
+      Authorization: `Bearer ${config.BlobReadWriteToken}`,
+    },
+  })
+  return data
 })

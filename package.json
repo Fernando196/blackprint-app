@@ -8,6 +8,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "update-vercel": "node scripts/update-vercel.js",
     "process": "node --experimental-vm-modules scripts/process-data.js"
   },
   "dependencies": {
@@ -17,9 +18,11 @@
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/vue-table": "^8.21.3",
     "@types/leaflet.markercluster": "^1.5.6",
+    "@vercel/blob": "^2.4.0",
     "chart.js": "^4.5.1",
     "csv-parse": "^6.2.1",
     "dayjs-nuxt": "^2.1.11",
+    "dotenv": "^17.4.2",
     "leaflet.markercluster": "^1.5.3",
     "nuxt": "^4.4.6",
     "vue": "^3.5.34",

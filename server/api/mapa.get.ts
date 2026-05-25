@@ -1,8 +1,11 @@
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
+import { MapPoint } from '../../app/types/mapa'
 
-export default defineEventHandler(() => {
-  const filePath = resolve('server/data/mapa.json')
-  const raw = readFileSync(filePath, 'utf-8')
-  return JSON.parse(raw)
+export default defineEventHandler(async () => {
+  const config = useRuntimeConfig()
+  const data = await $fetch<MapPoint[]>(`${config.blobUrl}/mapa.json`, {
+    headers: {
+      Authorization: `Bearer ${config.BlobReadWriteToken}`,
+    },
+  })
+  return data
 })

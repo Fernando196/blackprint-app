@@ -1,7 +1,4 @@
-import { readFileSync } from 'fs'
-import { resolve } from 'path'
-
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const query = getQuery(event)
 
   const tipo = query.tipo as string | undefined
@@ -12,9 +9,14 @@ export default defineEventHandler((event) => {
   const limite = query.limite ? Number(query.limite) : 100
   const pagina = query.pagina ? Number(query.pagina) : 1
 
-  const filePath = resolve('server/data/tabla.json')
-  const raw = readFileSync(filePath, 'utf-8')
-  let registros: Record<string, unknown>[] = JSON.parse(raw)
+  const config = useRuntimeConfig()
+  const data = await $fetch<any[]>(`${config.blobUrl}/tabla.json`, {
+    headers: {
+      Authorization: `Bearer ${config.BlobReadWriteToken}`,
+    },
+  })
+
+  let registros: Record<string, unknown>[] = data
 
   if (tipo) {
     registros = registros.filter((r) => r.tipo === tipo)
