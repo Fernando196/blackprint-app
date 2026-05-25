@@ -37,9 +37,16 @@ const ISO_TO_INEGI: Record<string, string> = {
   'MX-ZAC': '32',
 }
 
-export default defineEventHandler(async () => {
-  const geoPath = resolve('public/data/estados.geojson')
-  const geoData = JSON.parse(readFileSync(geoPath, 'utf-8'))
+export default defineEventHandler(async (event) => {
+  let geoData: any
+
+  if (import.meta.dev) {
+    const geoPath = resolve('public/data/estados.geojson')
+    geoData = JSON.parse(readFileSync(geoPath, 'utf-8'))
+  } else {
+    const { origin } = getRequestURL(event)
+    geoData = await $fetch(`${origin}/data/estados.geojson`)
+  }
 
   let estadosData: PorEstado[]
   if (import.meta.dev) {
