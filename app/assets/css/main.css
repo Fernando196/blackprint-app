@@ -1,20 +1,7 @@
-/* ==========================================================================
-   BlackPrint — Colors & Type
-   Source of truth for brand tokens.
-   --------------------------------------------------------------------------
-   Color system is built on "Shades" (depth scale 1-9) + "Accents"
-   (blue + pink). Marketing may use Natural (beige/brown) + Cool (navy) sets.
-   Text contrast rule: text should be at least two levels away from its
-   container (e.g. depth 7 container → depth 5 or lighter text).
-   ========================================================================== */
+@import 'tailwindcss';
 
-/* ---------- Web fonts ---------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300..800;1,300..800&family=Inter:wght@400..700&display=swap');
-
-/* Bai Jamjuree — brand display face (uploaded).
-   Used for large display moments: Auth/Onboarding hero type, website
-   marketing headlines. ExtraLight / Light / Bold / BoldItalic shipped;
-   Bold covers SemiBold use cases in the source. */
+/* Bai Jamjuree — brand display face.
+   ExtraLight / Light / Bold / BoldItalic shipped. */
 @font-face {
   font-family: 'Bai Jamjuree';
   src: url('fonts/BaiJamjuree-ExtraLight.ttf') format('truetype');
@@ -44,6 +31,12 @@
   font-display: swap;
 }
 
+/* ==========================================================================
+   :root — Brand primitives. Never remove or rename these.
+   Components should prefer the semantic @theme tokens (bg-surface, text-fg…)
+   but primitives stay here as the single source of truth.
+   ========================================================================== */
+
 :root {
   /* =====================================================================
      SHADES — primary color system. Used for containers, titles, body.
@@ -61,7 +54,6 @@
 
   /* =====================================================================
      ACCENTS — used sparingly for key brand moments, links, status.
-     "blue h" = hover/light, "blue p" = primary.
      ===================================================================== */
   --blue-h: #52bcf5; /* Highlights, active hover */
   --blue-p: #0875e3; /* Primary link / focus / CTA accent */
@@ -69,7 +61,7 @@
   --pink-p: #fe2b7c; /* Hot pink accent (brand geometry) */
 
   /* =====================================================================
-     SEMANTIC STATUS — derived from frequent usage in Figma.
+     SEMANTIC STATUS
      ===================================================================== */
   --success: #0ca036;
   --success-soft: #e8eeee;
@@ -78,17 +70,18 @@
   --info-soft: #daf1ff;
   --warning: #c0ca33;
 
-  /* Marketing palettes (lower-usage "sets"): */
+  /* Marketing palettes */
   --natural-cream: #e2d9d0;
   --natural-taupe: #aaa39d;
   --natural-brown: #493628;
   --natural-warm: #897f79;
   --cool-navy: #8aa0ca;
   --cool-teal: #8acac4;
-  --coral: #ff6f61; /* orange accent in geometry set */
+  --coral: #ff6f61;
 
   /* =====================================================================
-     SEMANTIC ALIASES — use these in components when possible.
+     LEGACY SEMANTIC ALIASES — kept for backwards-compat only.
+     New code uses @theme tokens (bg-surface, text-fg, etc.).
      ===================================================================== */
   --bg: var(--on-primary);
   --bg-dark: var(--depth-9);
@@ -97,12 +90,12 @@
   --surface-dark: var(--depth-8);
   --surface-dark-2: var(--depth-7);
 
-  --fg: var(--on-secondary); /* primary text on light */
-  --fg-2: var(--depth-6); /* secondary text on light */
-  --fg-3: var(--depth-5); /* tertiary text on light */
-  --fg-inverse: var(--on-primary); /* text on dark */
-  --fg-inverse-2: var(--depth-3); /* secondary text on dark */
-  --fg-inverse-3: var(--depth-5); /* tertiary text on dark */
+  --fg: var(--on-secondary);
+  --fg-2: var(--depth-6);
+  --fg-3: var(--depth-5);
+  --fg-inverse: var(--on-primary);
+  --fg-inverse-2: var(--depth-3);
+  --fg-inverse-3: var(--depth-5);
 
   --border: var(--depth-1);
   --border-2: #e7e6ea;
@@ -113,16 +106,13 @@
   --link: var(--blue-p);
 
   /* =====================================================================
-     TYPOGRAPHY
-     Work Sans — primary UI + marketing. Inter — dense data, forms.
-     Poppins — display accents (rare). Tight negative letter-spacing.
+     TYPOGRAPHY — source of truth for font stacks and type scale.
      ===================================================================== */
   --font-sans: 'Work Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-ui: 'Inter', 'Work Sans', system-ui, sans-serif;
-  --font-display: 'Bai Jamjuree', 'Work Sans', sans-serif; /* brand display face */
+  --font-display: 'Bai Jamjuree', 'Work Sans', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Type scale (from Figma /Design-System/Typography) */
   --fs-h1: 48px;
   --lh-h1: 1.2;
   --tr-h1: -0.03em;
@@ -149,7 +139,7 @@
   --tr-micro: -0.02em;
 
   /* =====================================================================
-     SPACING, RADII, ELEVATION
+     SPACING, RADII
      ===================================================================== */
   --s-1: 2px;
   --s-2: 4px;
@@ -167,24 +157,90 @@
   --r-lg: 16px;
   --r-xl: 24px;
   --r-pill: 999px;
+}
 
+/* ==========================================================================
+   Tailwind theme tokens — these generate utility classes.
+
+   Semantic colors (bg-bg, bg-surface, text-fg, text-fg-muted, etc.) are set
+   here as dark defaults. [data-theme="light"] overrides them below.
+
+   Rule: use these semantic tokens in components, not the raw depth scale.
+   Use depth-scale tokens (bg-depth-8, text-depth-5) only when you need a
+   specific shade regardless of the active theme.
+   ========================================================================== */
+
+@theme {
+  /* --- Semantic colors (dark default, theme-aware) --- */
+  --color-bg: #2f2f2f;
+  --color-surface: #383838;
+  --color-surface-raised: #484848;
+  --color-fg: #ffffff;
+  --color-fg-muted: #b7bcc0;
+  --color-fg-subtle: #8d9398;
+  --color-border: #484848;
+  --color-border-subtle: #646669;
+
+  /* --- Brand accents (static, never swap with theme) --- */
+  --color-accent: #0875e3;
+  --color-accent-soft: #52bcf5;
+  --color-brand: #fe2b7c;
+  --color-brand-soft: #ff9e9e;
+
+  /* --- Status (static) --- */
+  --color-success: #0ca036;
+  --color-danger: #aa2009;
+  --color-warning: #c0ca33;
+
+  /* --- Depth scale (static, for explicit shade targeting) --- */
+  --color-depth-9: #2f2f2f;
+  --color-depth-8: #383838;
+  --color-depth-7: #484848;
+  --color-depth-6: #646669;
+  --color-depth-5: #8d9398;
+  --color-depth-3: #b7bcc0;
+  --color-depth-1: #d7dce0;
+
+  /* --- Fonts --- */
+  --font-sans: 'Work Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-ui: 'Inter', 'Work Sans', system-ui, sans-serif;
+  --font-display: 'Bai Jamjuree', 'Work Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* --- Shadows --- */
   --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 1px rgba(0, 0, 0, 0.04);
   --shadow-2: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.12); /* modal / popover */
-  --shadow-4: 0 12px 40px rgba(0, 0, 0, 0.25); /* map floating panel */
+  --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-4: 0 12px 40px rgba(0, 0, 0, 0.25);
   --shadow-inset-glow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 /* ==========================================================================
-   Semantic element styles
+   Light theme — apply data-theme="light" to <html> to activate.
+   Only overrides the semantic color tokens; primitives stay untouched.
+   ========================================================================== */
+
+[data-theme='light'] {
+  --color-bg: #ffffff;
+  --color-surface: #f7f8f9;
+  --color-surface-raised: #ffffff;
+  --color-fg: #231f20;
+  --color-fg-muted: #646669;
+  --color-fg-subtle: #8d9398;
+  --color-border: #d7dce0;
+  --color-border-subtle: #e7e6ea;
+}
+
+/* ==========================================================================
+   Base element styles — use semantic tokens so they adapt to the theme.
    ========================================================================== */
 
 body {
   font-family: var(--font-sans);
   font-size: var(--fs-p);
   line-height: var(--lh-p);
-  color: var(--fg);
-  background: var(--bg);
+  color: var(--color-fg);
+  background-color: var(--color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -196,9 +252,10 @@ h1,
   font-size: var(--fs-h1);
   line-height: var(--lh-h1);
   letter-spacing: var(--tr-h1);
-  color: var(--fg);
+  color: var(--color-fg);
   margin: 0;
 }
+
 h2,
 .h2 {
   font-family: var(--font-sans);
@@ -206,9 +263,10 @@ h2,
   font-size: var(--fs-h2);
   line-height: var(--lh-h2);
   letter-spacing: var(--tr-h2);
-  color: var(--fg);
+  color: var(--color-fg);
   margin: 0;
 }
+
 h3,
 .h3 {
   font-family: var(--font-sans);
@@ -216,9 +274,10 @@ h3,
   font-size: var(--fs-h3);
   line-height: var(--lh-h3);
   letter-spacing: var(--tr-h3);
-  color: var(--fg);
+  color: var(--color-fg);
   margin: 0;
 }
+
 h4,
 .h4 {
   font-family: var(--font-sans);
@@ -226,71 +285,118 @@ h4,
   font-size: var(--fs-h4);
   line-height: 1.4;
   letter-spacing: var(--tr-h4);
-  color: var(--fg);
+  color: var(--color-fg);
   margin: 0;
 }
+
 p,
 .p {
   font-family: var(--font-sans);
   font-size: var(--fs-p);
   line-height: var(--lh-p);
-  color: var(--fg);
+  color: var(--color-fg);
   margin: 0;
 }
+
 small,
 .sm {
   font-family: var(--font-sans);
   font-size: var(--fs-sm);
   line-height: var(--lh-sm);
-  color: var(--fg-2);
+  color: var(--color-fg-muted);
 }
-.xs {
-  font-family: var(--font-sans);
-  font-size: var(--fs-xs);
-  line-height: var(--lh-xs);
-  letter-spacing: var(--tr-xs);
-  color: var(--fg-2);
-}
-.eyebrow {
-  font-family: var(--font-sans);
-  font-weight: 500;
-  font-size: 12px;
-  line-height: 16px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--fg-3);
-}
+
 code,
 .mono {
   font-family: var(--font-mono);
   font-size: 13px;
-  color: var(--fg);
+  color: var(--color-fg);
 }
+
 a,
 .link {
-  color: var(--link);
+  color: var(--color-accent);
   text-decoration: none;
   transition: color 120ms ease;
 }
+
 a:hover,
 .link:hover {
-  color: var(--blue-h);
+  color: var(--color-accent-soft);
 }
 
-/* Dark surfaces — swap text aliases automatically */
-.on-dark {
-  color: var(--fg-inverse);
-  background: var(--depth-8);
+/* ==========================================================================
+   Leaflet overrides — dark theme for map popups and controls.
+   ========================================================================== */
+
+.leaflet-popup-content-wrapper {
+  background-color: var(--color-surface);
+  color: var(--color-fg);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-4);
+  border: none;
+  padding: 0;
 }
-.on-dark h1,
-.on-dark h2,
-.on-dark h3,
-.on-dark h4,
-.on-dark p {
-  color: var(--fg-inverse);
+
+.leaflet-popup-content {
+  margin: 0;
+  line-height: inherit;
 }
-.on-dark small,
-.on-dark .sm,
-.on-dark .xs {
-  color: var(--fg-inverse-2);
+
+.leaflet-popup-tip {
+  background-color: var(--color-surface);
+}
+
+.leaflet-popup-close-button {
+  color: var(--color-fg-muted) !important;
+  top: 6px !important;
+  right: 8px !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: var(--color-fg) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: var(--color-surface) !important;
+  color: var(--color-fg) !important;
+  border-color: var(--color-border) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: var(--color-surface-raised) !important;
+}
+
+.leaflet-control-attribution {
+  background-color: color-mix(in srgb, var(--color-bg) 85%, transparent) !important;
+  color: var(--color-fg-subtle) !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--color-accent) !important;
+}
+
+/* ==========================================================================
+   Marker cluster — custom brand icon for leaflet.markercluster
+   ========================================================================== */
+
+.bp-cluster {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #0875e3;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 0 0 5px rgba(8, 117, 227, 0.2);
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.bp-cluster:hover {
+  transform: scale(1.1);
 }
