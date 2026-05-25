@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  css: ['./app/assets/css/main.css'],
+  css: ['./app/assets/css/main.css', 'leaflet.markercluster/dist/MarkerCluster.css'],
   modules: ['@nuxt/eslint', 'dayjs-nuxt', '@pinia/nuxt', '@nuxtjs/leaflet'],
   vite: {
     plugins: [tailwindcss()],
