@@ -38,8 +38,10 @@
     if (!mapInstance || !props.points || props.points.length === 0) return
 
     // 1. Forzar a Leaflet a estar en el scope global antes de cargar el plugin
-    const L = await import('leaflet')
-    if (!window.L) {
+    const LeafletModule = await import('leaflet')
+    const L = Object.create(LeafletModule.default || LeafletModule)
+    // Aseguramos que esté en el objeto window global para el plugin
+    if (typeof window !== 'undefined') {
       window.L = L
     }
     await import('leaflet.markercluster')
