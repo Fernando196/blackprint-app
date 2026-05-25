@@ -10,7 +10,7 @@ export default defineEventHandler(async () => {
     data = JSON.parse(raw)
   } else {
     const config = useRuntimeConfig()
-    const data = await $fetch<MapPoint[]>(`${config.blobUrl}/mapa.json`, {
+    data = await $fetch<MapPoint[]>(`${config.blobUrl}/mapa.json`, {
       headers: {
         Authorization: `Bearer ${config.BlobReadWriteToken}`,
       },
