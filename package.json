@@ -1,0 +1,30 @@
+{
+  "name": "blackprint-app",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "process": "node --experimental-vm-modules scripts/process-data.js"
+  },
+  "dependencies": {
+    "@nuxt/eslint": "^1.15.2",
+    "@nuxtjs/leaflet": "^1.3.2",
+    "@pinia/nuxt": "^0.11.3",
+    "@tailwindcss/vite": "^4.2.2",
+    "@tanstack/vue-table": "^8.21.3",
+    "chart.js": "^4.5.1",
+    "csv-parse": "^6.2.1",
+    "dayjs-nuxt": "^2.1.11",
+    "nuxt": "^4.4.6",
+    "vue": "^3.5.34",
+    "vue-router": "^5.0.7"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.2",
+    "prettier-plugin-tailwindcss": "^0.7.2"
+  }
+}
