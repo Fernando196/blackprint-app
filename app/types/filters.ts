@@ -4,3 +4,8 @@ export type FiltrosOpciones = {
   entidades: string[]
   bancos: string[]
 }
+
+export type DropdownOption = {
+  label: string
+  value: number
+}

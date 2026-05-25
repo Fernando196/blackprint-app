@@ -17,3 +17,10 @@ export type ClasesConstruccion = ItemCatalogo
 export type AlumbradoPublico = ItemCatalogo
 export type CalidadProyecto = ItemCatalogo
 export type TipoInmueble = ItemCatalogo
+
+export type Estado = ItemCatalogo
+
+export interface Municipio extends ItemCatalogo {
+  idEstado: number
+  nombreEstado: string
+}

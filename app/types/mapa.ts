@@ -24,3 +24,23 @@ export type MapFilters = {
   valorMin: number | null
   valorMax: number | null
 }
+
+export type EstadoGeoProperties = {
+  name: string
+  id: string
+  CNTRY: string
+  TYPE: string
+  entidadId: string | null
+  count: number
+}
+
+export type EstadoGeoFeature = {
+  type: 'Feature'
+  properties: EstadoGeoProperties
+  geometry: object
+}
+
+export type EstadoGeoCollection = {
+  type: 'FeatureCollection'
+  features: EstadoGeoFeature[]
+}

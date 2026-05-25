@@ -1,16 +1,5 @@
-export interface TipoItem { tipo: string; count: number }
-export interface ClaseItem { clase: string; count: number }
-export interface BancoItem { banco: string; count: number }
-
-export interface Metricas {
-  total: number
-  valorPromedio: number
-  valorMediano: number
-  m2Promedio: number
-  porTipo: TipoItem[]
-  porClase: ClaseItem[]
-  porBanco: BancoItem[]
-}
+import type { Metricas } from '~/types/metricas'
+export type { TipoItem, ClaseItem, BancoItem, Metricas } from '~/types/metricas'
 
 const fmtMXN = (n: number) =>
   new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n)
