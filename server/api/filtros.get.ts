@@ -1,12 +1,22 @@
 import { TablaResponse, TablaRecord } from '../../app/types/tabla.interface'
+import { resolve } from 'path'
+import { readFileSync } from 'fs'
 
 export default defineEventHandler(async () => {
-  const config = useRuntimeConfig()
-  const data = await $fetch<TablaResponse[]>(`${config.blobUrl}/tabla.json`, {
-    headers: {
-      Authorization: `Bearer ${config.BlobReadWriteToken}`,
-    },
-  })
+  let data: TablaResponse[] = []
+
+  if (import.meta.dev) {
+    const filePath = resolve('server/data/tabla.json')
+    const raw = readFileSync(filePath, 'utf-8')
+    data = JSON.parse(raw)
+  } else {
+    const config = useRuntimeConfig()
+    data = await $fetch<TablaResponse[]>(`${config.blobUrl}/tabla.json`, {
+      headers: {
+        Authorization: `Bearer ${config.BlobReadWriteToken}`,
+      },
+    })
+  }
   const registros: TablaResponse[] = data
 
   const unique = (key: keyof TablaRecord) =>
