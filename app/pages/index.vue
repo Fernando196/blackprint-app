@@ -1,11 +1,10 @@
 <script setup lang="ts">
   import BarChart from '~/components/charts/BarChart.vue'
   import ChartCard from '~/components/charts/ChartCard.vue'
+  import ChatBot from '~/components/ui/ChatBot.vue'
   import DonutChart from '~/components/charts/DonutChart.vue'
   import HorizontalBarChart from '~/components/charts/HorizontalBarChart.vue'
-  import FilterBar from '~/components/ui/FilterBar.vue'
   import KpiCard from '~/components/ui/KpiCard.vue'
-  import PageHeader from '~/components/ui/PageHeader.vue'
   import Mapfilter from '~/components/map/Mapfilter.vue'
   import { fmtMXN, fmtN } from '~/helpers/common'
   import type { TipoItem, ClaseItem, BancoItem } from '~/types/metricas'
@@ -83,18 +82,29 @@
 </script>
 
 <template>
-  <div class="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+  <div
+    class="flex h-full [scrollbar-width:none] flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden"
+  >
     <div class="flex h-[calc(100vh-72px)] shrink-0 overflow-hidden">
+      <div class="relative flex-1">
+        <Mapfilter
+          :points="puntosVisibles"
+          :filter-points="puntosFiltrados"
+          :is-loading="isLoading"
+          :has-error="hasError"
+          :show-expanded="true"
+          @on-change-expanded="handleChangeExpanded"
+        />
+      </div>
       <aside
         v-if="!mapaExpandido"
-        class="border-border bg-bg flex w-1/3 shrink-0 [scrollbar-width:none] flex-col overflow-y-auto border-r [&::-webkit-scrollbar]:hidden"
+        class="border-border bg-bg flex w-[500px] shrink-0 [scrollbar-width:none] flex-col overflow-y-auto border-r [&::-webkit-scrollbar]:hidden"
       >
         <div class="flex flex-col gap-(--s-5) p-(--s-6)">
-          <PageHeader
-            eyebrow="Inteligencia Inmobiliaria"
-            title="Dashboard"
-            subtitle="México · Septiembre 2024"
-          />
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl! font-bold">Dashboard -</h1>
+            <p>México - Septiembre 2024</p>
+          </div>
 
           <div class="grid grid-cols-2 gap-(--s-3)">
             <KpiCard
@@ -119,18 +129,7 @@
           </ChartCard>
         </div>
       </aside>
-
-      <div class="relative flex-1">
-        <Mapfilter
-          :points="puntosVisibles"
-          :filter-points="puntosFiltrados"
-          :is-loading="isLoading"
-          :has-error="hasError"
-          :show-expanded="true"
-          @on-change-expanded="handleChangeExpanded"
-        />
-      </div>
     </div>
-
+    <ChatBot />
   </div>
 </template>

@@ -38,7 +38,7 @@ watch(messages, async () => {
 <template>
   <!-- Floating button -->
   <button
-    class="fixed bottom-6 right-6 z-[1000] flex h-14 w-14 items-center justify-center rounded-full bg-[var(--blue-p)] shadow-[var(--shadow-4)] transition-transform hover:scale-105 active:scale-95"
+    class="fixed bottom-6 left-[284px] z-[1000] flex h-14 w-14 items-center justify-center rounded-full bg-[var(--blue-p)] shadow-[var(--shadow-4)] transition-transform hover:scale-105 active:scale-95"
     aria-label="Abrir asistente inmobiliario"
     @click="toggleChat"
   >
@@ -54,7 +54,7 @@ watch(messages, async () => {
   <Transition name="chat-panel">
     <div
       v-if="isOpen"
-      class="fixed bottom-24 right-6 z-[999] flex w-[380px] flex-col overflow-hidden rounded-[var(--r-xl)] bg-[var(--depth-8)] shadow-[var(--shadow-4)]"
+      class="fixed bottom-24 left-[284px] z-[999] flex w-[380px] flex-col overflow-hidden rounded-[var(--r-xl)] bg-[var(--depth-8)] shadow-[var(--shadow-4)]"
       style="max-height: calc(100vh - 140px); border-left: 1px solid var(--depth-7);"
     >
       <!-- Header -->
