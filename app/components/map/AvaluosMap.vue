@@ -9,6 +9,7 @@
   }>()
 
   const filterStore = useFilterStore()
+  const { getTipoInmueble, getClaseConstruccion, getEstado } = useCatalog()
   const MEXICO_CENTER = [23.6345, -102.5528] as [number, number]
   const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
   const ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO'
@@ -44,17 +45,30 @@
   }
 
   function popupHtml(point: MapPoint): string {
-    return `
-      <div style="min-width:200px;padding:12px">
-        <p style="font-family:var(--font-sans);font-size:14px;font-weight:600;color:var(--color-fg);margin:0">${point.tipo}</p>
-        <p style="font-family:var(--font-sans);font-size:12px;color:var(--color-fg-muted);margin:4px 0 0">${point.clase}</p>
-        <p style="font-family:var(--font-ui);font-size:16px;font-weight:600;color:var(--color-accent);margin:8px 0 0">${fmtMXN(point.valorConcluido)}</p>
-        <p style="font-family:var(--font-ui);font-size:12px;color:var(--color-fg-subtle);margin:0">${fmtMXN(point.valorM2)} / m²</p>
-        <div style="border-top:1px solid var(--color-border);margin-top:8px;padding-top:8px">
-          <p style="font-family:var(--font-sans);font-size:12px;color:var(--color-fg-muted);margin:0">${point.colonia}</p>
-          <p style="font-family:var(--font-sans);font-size:12px;color:var(--color-fg-subtle);margin:0">${point.municipio}</p>
+    const tipo = getTipoInmueble(point.tipo)
+    const clase = getClaseConstruccion(point.clase)
+    const estado = getEstado(Number(point.entidad))?.nombre ?? point.entidad
+
+    return `<div style="min-width:230px;padding:14px;font-family:var(--font-sans)">
+      <div style="margin-bottom:12px">
+        <span style="display:inline-block;background:#0875E3;color:#ffffff;font-size:11px;font-family:var(--font-ui);font-weight:600;padding:3px 10px;border-radius:999px;letter-spacing:0.01em">${tipo}</span>
+      </div>
+      <p style="font-size:10px;font-weight:600;color:#8D9398;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 3px;font-family:var(--font-ui)">Valor concluido</p>
+      <p style="font-size:22px;font-weight:700;color:#ffffff;font-family:var(--font-ui);margin:0 0 12px;letter-spacing:-0.02em">${fmtMXN(point.valorConcluido)}</p>
+      <div style="display:flex;gap:16px;margin-bottom:12px">
+        <div>
+          <p style="font-size:10px;color:#8D9398;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 2px;font-family:var(--font-ui)">Valor m²</p>
+          <p style="font-size:13px;font-weight:600;color:#52BCF5;font-family:var(--font-ui);margin:0">${fmtMXN(point.valorM2)}</p>
         </div>
-      </div>`
+        <div>
+          <p style="font-size:10px;color:#8D9398;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 2px;font-family:var(--font-ui)">Clase</p>
+          <p style="font-size:13px;font-weight:500;color:#B7BCC0;font-family:var(--font-sans);margin:0">${clase}</p>
+        </div>
+      </div>
+      <div style="height:1px;background:#484848;margin-bottom:12px"></div>
+      <p style="font-size:14px;color:#ffffff;font-weight:500;font-family:var(--font-sans);margin:0 0 2px">${point.colonia}</p>
+      <p style="font-size:12px;color:#8D9398;font-family:var(--font-sans);margin:0">${estado}</p>
+    </div>`
   }
 
   function tooltipHtml(name: string, count: number): string {
