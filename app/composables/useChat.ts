@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import type { FiltrosAplicados } from '~/types/filters'
 
 export interface ChatMessage {
   role: 'user' | 'assistant'
@@ -14,6 +15,12 @@ export interface UseChatReturn {
   toggleChat: () => void
 }
 
+interface ChatResponse {
+  response: string
+  filtrosAplicados?: FiltrosAplicados
+  limpiar?: boolean
+}
+
 export function useChat(): UseChatReturn {
   const messages = ref<ChatMessage[]>([])
   const isLoading = ref(false)
@@ -24,7 +31,7 @@ export function useChat(): UseChatReturn {
   const BIENVENIDA: ChatMessage = {
     role: 'assistant',
     content:
-      'Hola. Soy el asistente inmobiliario de BlackPrint. Puedo responder preguntas sobre el dataset de avalúos hipotecarios de México de septiembre 2024 — valores, distribución por tipo, estados con mayor actividad, y más. Si tienes filtros activos en la app, mis respuestas reflejarán ese subconjunto.',
+      'Hola. Soy el asistente inmobiliario de BlackPrint. Puedo responder preguntas sobre el dataset de avalúos hipotecarios de México de septiembre 2024 — valores, distribución por tipo, estados con mayor actividad, y más. También puedo aplicar filtros directamente en la app si me lo pides.',
     timestamp: Date.now(),
   }
 
@@ -33,6 +40,17 @@ export function useChat(): UseChatReturn {
     if (isOpen.value && messages.value.length === 0) {
       messages.value = [BIENVENIDA]
     }
+  }
+
+  function aplicarFiltrosEnStore(filtros: FiltrosAplicados): void {
+    filterStore.onChangeFilters({
+      ...filterStore.filters,
+      tipo: filtros.tipo != null ? String(filtros.tipo) : '',
+      clase: filtros.clase != null ? String(filtros.clase) : '',
+      entidad: filtros.entidad != null ? String(filtros.entidad) : null,
+      valorMin: filtros.valorMin ?? null,
+      valorMax: filtros.valorMax ?? null,
+    })
   }
 
   async function sendMessage(text: string): Promise<void> {
@@ -54,11 +72,18 @@ export function useChat(): UseChatReturn {
     }
 
     try {
-      const { response } = await $fetch<{ response: string }>('/api/chat', {
+      const data = await $fetch<ChatResponse>('/api/chat', {
         method: 'POST',
         body: { message: trimmed, filtros },
       })
-      messages.value.push({ role: 'assistant', content: response, timestamp: Date.now() })
+
+      if (data.limpiar) {
+        filterStore.onCleanFilters()
+      } else if (data.filtrosAplicados) {
+        aplicarFiltrosEnStore(data.filtrosAplicados)
+      }
+
+      messages.value.push({ role: 'assistant', content: data.response, timestamp: Date.now() })
     } catch {
       messages.value.push({
         role: 'assistant',

@@ -1,3 +1,11 @@
+export interface FiltrosAplicados {
+  tipo?: number
+  clase?: number
+  entidad?: number
+  valorMin?: number
+  valorMax?: number
+}
+
 export type FiltrosOpciones = {
   tipos: string[]
   clases: string[]
