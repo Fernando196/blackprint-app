@@ -1,13 +1,17 @@
 <script setup lang="ts">
   import AppNavbar from '~/components/ui/AppNavbar.vue'
+  import FilterBar from '~/components/ui/FilterBar.vue'
+  const { points, puntosFiltrados } = useMapa()
 </script>
 
 <template>
-  <div class="bg-bg text-fg min-h-screen">
+  <div class="bg-bg text-fg">
     <AppNavbar />
-
-    <main class="pt-[72px]">
-      <slot />
+    <main class="mt-[72px] flex h-[calc(100vh-72px)] overflow-hidden">
+      <FilterBar :result-count="puntosFiltrados.length" :total-count="points.length" />
+      <div class="flex-1 overflow-hidden h-full">
+        <slot />
+      </div>
     </main>
   </div>
 </template>

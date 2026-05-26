@@ -1,7 +1,7 @@
 <script setup lang="ts">
   import type { DropdownOption } from '~/types/filters'
 
-  const model = defineModel<number | null>({ default: null })
+  const model = defineModel<string | null>({ default: null })
 
   withDefaults(
     defineProps<{
@@ -13,9 +13,9 @@
   )
 
   const selected = computed({
-    get: () => model.value?.toString() ?? '',
+    get: () => model.value ?? '',
     set: (v: string) => {
-      model.value = v === '' ? null : Number(v)
+      model.value = v === '' ? null : v
     },
   })
 </script>

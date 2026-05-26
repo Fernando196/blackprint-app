@@ -1,136 +1,176 @@
 <script setup lang="ts">
-  import type { MapFilters } from '~/types/mapa'
+  import { computed } from 'vue'
+  import { storeToRefs } from 'pinia'
   import CatalogDropdown from './CatalogDropdown.vue'
+  import type { DropdownOption } from '~/types/filters'
 
-  const props = defineProps<{
-    value: MapFilters
+  defineProps<{
     resultCount: number
     totalCount: number
   }>()
 
-  const emit = defineEmits<{
-    apply: [filters: MapFilters]
-    clear: []
-  }>()
+  const filtersStore = useFilterStore()
+  const { filters } = storeToRefs(filtersStore)
 
-  const { tiposOptions, clasesOptions, estadosOptions, getTipoInmueble, getClaseConstruccion } =
-    useCatalog()
+  const { tiposOptions, clasesOptions, estadosOptions } = useCatalog()
+  const { points } = useMapa()
 
-  const idTipo = ref<number | null>(
-    tiposOptions.value.find((o) => o.label === props.value.tipo)?.value ?? null
-  )
-  const idClase = ref<number | null>(
-    clasesOptions.value.find((o) => o.label === props.value.clase)?.value ?? null
-  )
-  const idEntidad = ref<number | null>(
-    props.value.entidad ? Number(props.value.entidad) || null : null
-  )
-  const valorMin = ref<number | null>(props.value.valorMin)
-  const valorMax = ref<number | null>(props.value.valorMax)
-
-  watch(
-    () => props.value,
-    (v) => {
-      idTipo.value = tiposOptions.value.find((o) => o.label === v.tipo)?.value ?? null
-      idClase.value = clasesOptions.value.find((o) => o.label === v.clase)?.value ?? null
-      idEntidad.value = v.entidad ? Number(v.entidad) || null : null
-      valorMin.value = v.valorMin
-      valorMax.value = v.valorMax
+  const idTipo = computed({
+    get: () => filters.value.tipo || null,
+    set: (val: string | null) => {
+      filtersStore.onChangeFilters({ ...filters.value, tipo: val || '' })
     },
-    { deep: true }
-  )
+  })
 
-  function aplicar(): void {
-    emit('apply', {
-      tipo: idTipo.value !== null ? getTipoInmueble(idTipo.value) : '',
-      clase: idClase.value !== null ? getClaseConstruccion(idClase.value) : '',
-      entidad: idEntidad.value?.toString() ?? '',
-      valorMin: valorMin.value,
-      valorMax: valorMax.value,
-    })
-  }
+  const idClase = computed({
+    get: () => filters.value.clase || null,
+    set: (val: string | null) => {
+      filtersStore.onChangeFilters({ ...filters.value, clase: val || '' })
+    },
+  })
 
-  function limpiar(): void {
-    idTipo.value = null
-    idClase.value = null
-    idEntidad.value = null
-    valorMin.value = null
-    valorMax.value = null
-    emit('clear')
-  }
+  const idEntidad = computed({
+    get: () => filters.value.entidad || null,
+    set: (val: string | null) => {
+      filtersStore.onChangeFilters({ ...filters.value, entidad: val })
+    },
+  })
 
-  watch([idTipo, idClase, idEntidad], () => aplicar())
+  const bancoOptions = computed<DropdownOption[]>(() => {
+    const set = new Set<string>()
+    for (const p of points.value) {
+      if (p.banco) set.add(p.banco)
+    }
+    return [...set].sort().map((b) => ({ label: b, value: b }))
+  })
+
+  const grupoOptions = computed<DropdownOption[]>(() => {
+    const set = new Set<string>()
+    for (const p of points.value) {
+      if (p.grupo) set.add(p.grupo)
+    }
+    return [...set].sort().map((g) => ({ label: g, value: g }))
+  })
+
+  const idBanco = computed({
+    get: () => filters.value.banco || null,
+    set: (val: string | null) => {
+      filtersStore.onChangeFilters({ ...filters.value, banco: val })
+    },
+  })
+
+  const idGrupo = computed({
+    get: () => filters.value.grupo || null,
+    set: (val: string | null) => {
+      filtersStore.onChangeFilters({ ...filters.value, grupo: val })
+    },
+  })
 
   const hayFiltros = computed(
     () =>
-      idTipo.value !== null ||
-      idClase.value !== null ||
-      idEntidad.value !== null ||
-      valorMin.value !== null ||
-      valorMax.value !== null
+      !!idTipo.value ||
+      !!idClase.value ||
+      !!idEntidad.value ||
+      !!idBanco.value ||
+      !!idGrupo.value ||
+      filters.value.valorMin !== null ||
+      filters.value.valorMax !== null
+  )
+
+  const tieneInstitucion = computed(
+    () => bancoOptions.value.length > 0 || grupoOptions.value.length > 0
   )
 </script>
 
 <template>
-  <div
-    class="border-border bg-bg flex h-[52px] shrink-0 items-center gap-(--s-3) border-b px-(--s-6)"
+  <aside
+    class="border-border bg-bg flex h-full w-[260px] shrink-0 flex-col overflow-y-auto border-r [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
   >
-    <div class="flex shrink-0 items-center gap-(--s-2)">
-      <img src="/icons/filter.svg" class="h-4 w-4 opacity-40 invert" alt="" />
+    <!-- Header -->
+    <div class="border-border flex h-11 shrink-0 items-center gap-(--s-2) border-b px-(--s-4)">
+      <img src="/icons/filter.svg" class="h-3.5 w-3.5 opacity-40 invert" alt="" />
       <span class="text-fg-subtle font-sans text-[11px] font-semibold tracking-[0.06em] uppercase">
         Filtros
       </span>
+      <button
+        v-if="hayFiltros"
+        class="text-fg-muted hover:text-fg ml-auto font-sans text-xs transition-colors"
+        @click="filtersStore.onCleanFilters()"
+      >
+        Limpiar
+      </button>
     </div>
 
-    <div class="bg-border mx-(--s-1) h-4 w-px shrink-0" />
+    <!-- Scroll area -->
+    <div class="flex flex-1 flex-col gap-(--s-5) p-(--s-4)">
+      <!-- Inmueble -->
+      <div class="flex flex-col gap-(--s-3)">
+        <p class="text-fg-subtle font-sans text-[10px] font-semibold tracking-[0.08em] uppercase">
+          Inmueble
+        </p>
+        <div class="flex flex-col gap-(--s-2)">
+          <CatalogDropdown v-model="idTipo" :options="tiposOptions" placeholder="Tipo" />
+          <CatalogDropdown v-model="idClase" :options="clasesOptions" placeholder="Clase" />
+        </div>
+      </div>
 
-    <CatalogDropdown v-model="idTipo" :options="tiposOptions" placeholder="Tipo" class="shrink-0" />
-    <CatalogDropdown
-      v-model="idClase"
-      :options="clasesOptions"
-      placeholder="Clase"
-      class="shrink-0"
-    />
-    <CatalogDropdown
-      v-model="idEntidad"
-      :options="estadosOptions"
-      placeholder="Estado"
-      class="shrink-0"
-    />
+      <!-- Ubicación -->
+      <div class="flex flex-col gap-(--s-3)">
+        <p class="text-fg-subtle font-sans text-[10px] font-semibold tracking-[0.08em] uppercase">
+          Ubicación
+        </p>
+        <CatalogDropdown v-model="idEntidad" :options="estadosOptions" placeholder="Estado" />
+      </div>
 
-    <div class="bg-border mx-(--s-1) h-4 w-px shrink-0" />
+      <!-- Institución (dinámico) -->
+      <div v-if="tieneInstitucion" class="flex flex-col gap-(--s-3)">
+        <p class="text-fg-subtle font-sans text-[10px] font-semibold tracking-[0.08em] uppercase">
+          Institución
+        </p>
+        <div class="flex flex-col gap-(--s-2)">
+          <CatalogDropdown
+            v-model="idBanco"
+            :options="bancoOptions"
+            placeholder="Banco"
+            :disabled="bancoOptions.length === 0"
+          />
+          <CatalogDropdown
+            v-model="idGrupo"
+            :options="grupoOptions"
+            placeholder="Grupo"
+            :disabled="grupoOptions.length === 0"
+          />
+        </div>
+      </div>
 
-    <input
-      v-model.number="valorMin"
-      type="number"
-      placeholder="Valor mín."
-      class="border-border bg-surface-raised font-ui text-fg placeholder:text-fg-subtle focus:border-accent w-[110px] shrink-0 rounded-full border px-(--s-3) py-[5px] text-sm transition-colors outline-none"
-      @blur="aplicar"
-      @keyup.enter="aplicar"
-    />
-    <span class="text-fg-subtle font-sans text-xs">—</span>
-    <input
-      v-model.number="valorMax"
-      type="number"
-      placeholder="Valor máx."
-      class="border-border bg-surface-raised font-ui text-fg placeholder:text-fg-subtle focus:border-accent w-[110px] shrink-0 rounded-full border px-(--s-3) py-[5px] text-sm transition-colors outline-none"
-      @blur="aplicar"
-      @keyup.enter="aplicar"
-    />
+      <!-- Valor -->
+      <div class="flex flex-col gap-(--s-3)">
+        <p class="text-fg-subtle font-sans text-[10px] font-semibold tracking-[0.08em] uppercase">
+          Valor concluido (MXN)
+        </p>
+        <div class="flex flex-col gap-(--s-2)">
+          <input
+            v-model.number="filters.valorMin"
+            type="number"
+            placeholder="Mínimo"
+            class="border-border bg-surface-raised font-ui text-fg placeholder:text-fg-subtle focus:border-accent w-full rounded-(--r-md) border px-(--s-3) py-[6px] text-sm transition-colors outline-none"
+          />
+          <input
+            v-model.number="filters.valorMax"
+            type="number"
+            placeholder="Máximo"
+            class="border-border bg-surface-raised font-ui text-fg placeholder:text-fg-subtle focus:border-accent w-full rounded-(--r-md) border px-(--s-3) py-[6px] text-sm transition-colors outline-none"
+          />
+        </div>
+      </div>
+    </div>
 
-    <div class="bg-border mx-(--s-1) h-4 w-px shrink-0" />
-
-    <button
-      v-if="hayFiltros"
-      class="border-border text-fg-muted hover:border-accent hover:text-fg shrink-0 rounded-full border px-(--s-3) py-[5px] font-sans text-sm font-medium transition-colors"
-      @click="limpiar"
-    >
-      Limpiar
-    </button>
-
-    <p class="font-ui text-fg-subtle ml-auto shrink-0 text-xs">
-      <span class="text-fg font-semibold">{{ resultCount.toLocaleString('es-MX') }}</span>
-      de {{ totalCount.toLocaleString('es-MX') }} avalúos
-    </p>
-  </div>
+    <!-- Footer: conteo -->
+    <div class="border-border mt-auto shrink-0 border-t px-(--s-4) py-(--s-3)">
+      <p class="font-ui text-fg-subtle text-xs">
+        <span class="text-fg font-semibold">{{ resultCount.toLocaleString('es-MX') }}</span>
+        de {{ totalCount.toLocaleString('es-MX') }} avalúos
+      </p>
+    </div>
+  </aside>
 </template>
