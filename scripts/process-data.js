@@ -1,117 +1,10 @@
-import { writeFileSync, mkdirSync } from 'fs'
+import { writeFileSync, mkdirSync, createReadStream } from 'fs'
 import { join, dirname } from 'path'
-import { createReadStream } from 'fs'
 import { parse } from 'csv-parse'
 import { fileURLToPath } from 'url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-
-// ─── CATÁLOGOS ───────────────────────────────────────────────
-const catalogos = {
-  vigilancia: {
-    0: 'No aplica',
-    1: 'Municipal',
-    2: 'Autónoma privada',
-    3: 'No existe',
-  },
-  telefonoSuministro: {
-    0: 'No aplica',
-    1: 'Red aérea',
-    2: 'Red subterránea',
-  },
-  redDistribucion: {
-    0: 'No aplica',
-    1: 'Con suministro al inmueble',
-    2: 'Sin suministro al inmueble',
-  },
-  suministro: {
-    0: 'No aplica',
-    1: 'Existe',
-    2: 'No existe',
-  },
-  proximidad: {
-    1: 'Céntrica',
-    2: 'Intermedia',
-    3: 'Periférica',
-    4: 'De expansión',
-    5: 'Rural',
-  },
-  equipamiento: {
-    1: 'Básico',
-    2: 'Con iglesia, mercado, escuelas y parques',
-    3: 'Con transporte público',
-    4: 'Con hospitales, bancos y más',
-  },
-  vialidades: {
-    0: 'No aplica',
-    1: 'Terracería',
-    2: 'Asfalto',
-    3: 'Concreto',
-    4: 'Empedrado',
-    5: 'Adoquín',
-    6: 'Otro',
-    7: 'No existe',
-    8: 'Pavimentación permeable',
-  },
-  guarniciones: {
-    0: 'No aplica',
-    1: 'Concreto',
-    2: 'Otro',
-    3: 'No existe',
-  },
-  banquetas: {
-    0: 'No aplica',
-    1: 'Concreto',
-    2: 'Empedrado',
-    3: 'Adoquín',
-    4: 'Otro',
-    5: 'No existe',
-  },
-  conservacion: {
-    0: 'No aplica',
-    1: 'Ruinoso',
-    2: 'Malo',
-    3: 'Regular',
-    4: 'Bueno',
-    5: 'Muy bueno',
-    6: 'Nuevo',
-    7: 'Recientemente remodelado',
-  },
-  clasesConstruccion: {
-    0: 'No aplica',
-    1: 'Mínima',
-    2: 'Económica',
-    3: 'Interés social',
-    4: 'Media',
-    5: 'Semilujo',
-    6: 'Residencial',
-    7: 'Residencial Plus',
-    8: 'Única',
-  },
-  alumbrado: {
-    0: 'No aplica',
-    1: 'Sin alumbrado',
-    2: 'Aéreo',
-    3: 'Subterráneo',
-  },
-  calidadProyecto: {
-    0: 'No aplica',
-    1: 'Funcional',
-    2: 'No funcional',
-    3: 'Adecuado a su época',
-  },
-  tipoInmueble: {
-    1: 'Terreno',
-    2: 'Casa habitación',
-    3: 'Casa en condominio',
-    4: 'Departamento en condominio',
-    5: 'Otro',
-    6: 'Vivienda múltiple',
-  },
-}
-
 // ─── HELPERS ─────────────────────────────────────────────────
-const decode = (catalogo, valor) => catalogo[parseInt(valor)] ?? valor
 const num = (v) => parseFloat(v) || 0
 const str = (v) => (v ?? '').toString().trim()
 
@@ -146,17 +39,21 @@ const avaluos = raw
     colonia: str(r['Colonia']),
     lat: num(r['LATITUD']),
     lng: num(r['LONGITUD']),
-    tipo: decode(catalogos.tipoInmueble, r['TIPO']),
-    clase: decode(catalogos.clasesConstruccion, r['CLASE']),
-    conservacion: decode(catalogos.conservacion, r['CONSERVACION']),
-    proximidad: decode(catalogos.proximidad, r['ID PROXIMIDAD URBANA']),
-    vigilancia: decode(catalogos.vigilancia, r['ID VIGILANCIA']),
-    equipamiento: decode(catalogos.equipamiento, r['ID EQUIPAMIENTO']),
-    vialidades: decode(catalogos.vialidades, r['ID VIALIDADES']),
-    banquetas: decode(catalogos.banquetas, r['ID BANQUETAS']),
-    guarniciones: decode(catalogos.guarniciones, r['ID GUARNICIONES']),
-    alumbrado: decode(catalogos.alumbrado, r['ID ALUMBRADO']),
-    calidadProyecto: decode(catalogos.calidadProyecto, r['ID CALIDAD PROYECTO']),
+
+    // --- Catálogos (Solo IDs directos) ---
+    tipo: r['TIPO'],
+    clase: r['CLASE'],
+    conservacion: r['CONSERVACION'],
+    proximidad: r['ID PROXIMIDAD URBANA'],
+    vigilancia: r['ID VIGILANCIA'],
+    equipamiento: r['ID EQUIPAMIENTO'],
+    vialidades: r['ID VIALIDADES'],
+    banquetas: r['ID BANQUETAS'],
+    guarniciones: r['ID GUARNICIONES'],
+    alumbrado: r['ID ALUMBRADO'],
+    calidadProyecto: r['ID CALIDAD PROYECTO'],
+
+    // --- Datos Numéricos / Métricas ---
     supTerreno: num(r['SUP TERRENO']),
     supConstruida: num(r['SUP CONSTRUIDA']),
     supVendible: num(r['SUP VENDIBLE']),
@@ -171,6 +68,8 @@ const avaluos = raw
     valorFisicoConstruccion: num(r['VALOR_FISICO_CONSTRUCCION']),
     valorM2: num(r['$M2 SV']),
     valorComparativo: num(r['VALOR COMPARATIVO']),
+
+    // --- Información General ---
     fechaAvaluo: str(r['FECHA AVALUO']),
     grupo: str(r['GRUPO']),
     banco: str(r['SIGLAS']),
@@ -257,6 +156,8 @@ const dataMapa = avaluos.map((a) => ({
   colonia: a.colonia,
   municipio: a.municipio,
   entidad: a.entidad,
+  banco: a.banco,
+  grupo: a.grupo,
 }))
 
 const dataTabla = avaluos.map((a) => ({

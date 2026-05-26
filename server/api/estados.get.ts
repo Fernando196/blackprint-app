@@ -1,4 +1,3 @@
-import { PorEstado } from '../../app/types/por_estado.type'
 import { resolve } from 'path'
 import { readFileSync } from 'fs'
 
@@ -10,11 +9,12 @@ export default defineEventHandler(async () => {
     const raw = readFileSync(filePath, 'utf-8')
     data = JSON.parse(raw)
   } else {
-    data = await $fetch<PorEstado[]>(`${config.blobUrl}/por_estado.json`, {
+    data = await $fetch<any[]>(`${config.blobUrl}/por_estado.json`, {
       headers: {
         Authorization: `Bearer ${config.BlobReadWriteToken}`,
       },
     })
   }
+
   return data
 })
