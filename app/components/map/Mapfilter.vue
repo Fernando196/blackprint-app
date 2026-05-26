@@ -2,6 +2,7 @@
   import type { MapPoint } from '~/types/mapa'
   import AvaluosMap from './AvaluosMap.vue'
   import MapFilterPanel from './MapFilterPanel.vue'
+  import EstadoPanel from './EstadoPanel.vue'
 
   interface Props {
     showExpanded?: boolean
@@ -17,7 +18,12 @@
     showExpanded: false,
     mapaExpandido: false,
   })
+
+  const filterStore = useFilterStore()
+  const { estados } = usePorEstado()
+  const { getTipoInmueble } = useCatalog()
   const mapaExpandido = ref<boolean>(props.mapaExpandido ?? false)
+
   const conteoPorEntidad = computed<Record<string, number>>(() => {
     const acc: Record<string, number> = {}
     for (const p of props.points) {
@@ -25,6 +31,28 @@
     }
     return acc
   })
+
+  const estadoSeleccionado = computed(() => filterStore.filters.entidad)
+
+  const estadoData = computed(() => {
+    if (!estadoSeleccionado.value) return null
+    return estados.value.find((e) => e.entidad === estadoSeleccionado.value) ?? null
+  })
+
+  const porTipoEstado = computed(() => {
+    if (!estadoSeleccionado.value) return []
+    const entidad = estadoSeleccionado.value
+    const tipoMap = new Map<string, number>()
+    for (const p of props.points.filter((p) => p.entidad === entidad)) {
+      const nombre = getTipoInmueble(p.tipo)
+      tipoMap.set(nombre, (tipoMap.get(nombre) ?? 0) + 1)
+    }
+    return [...tipoMap].map(([tipo, count]) => ({ tipo, count })).sort((a, b) => b.count - a.count)
+  })
+
+  function onCerrarPanel(): void {
+    filterStore.onChangeFilters({ ...filterStore.filters, entidad: null })
+  }
 
   const handleChangeExpanded = () => {
     mapaExpandido.value = !mapaExpandido.value
@@ -41,13 +69,13 @@
       :total-count="points.length"
     />
 
-    <!-- <EstadoPanel
-      v-if="estadoSeleccionado !== null"
-      :nombre="nombreEstado"
+    <EstadoPanel
+      v-if="estadoSeleccionado"
+      :nombre="estadoData?.nombreEntidad ?? ''"
       :estado-data="estadoData"
       :por-tipo="porTipoEstado"
       @cerrar="onCerrarPanel"
-    /> -->
+    />
 
     <button
       v-if="showExpanded"
