@@ -1,26 +1,41 @@
 <script setup lang="ts">
 import { Bar } from 'vue-chartjs'
-import type { BancoItem } from '~/types/metricas'
+import type { PorEstado } from '~/types/por_estado.type'
 
-const fmtN = (n: number) => new Intl.NumberFormat('es-MX').format(n)
+const props = defineProps<{ items: PorEstado[] }>()
 
-const props = defineProps<{ items: BancoItem[] }>()
+const { getEstado } = useCatalog()
 
-const horizLabelPlugin = {
-  id: 'horizLabels',
+const fmtMXN = (n: number) =>
+  new Intl.NumberFormat('es-MX', {
+    style: 'currency',
+    currency: 'MXN',
+    maximumFractionDigits: 0,
+  }).format(n)
+
+const top15 = computed(() =>
+  [...props.items].sort((a, b) => b.count - a.count).slice(0, 15)
+)
+
+const nombreEstado = (item: PorEstado) =>
+  getEstado(Number(item.entidad))?.nombre || item.nombreEntidad || item.entidad
+
+const promedioPlugin = {
+  id: 'promedioLabels',
   afterDatasetsDraw(chart: any) {
     const { ctx } = chart
     chart.data.datasets.forEach((_: any, i: number) => {
       const meta = chart.getDatasetMeta(i)
       if (meta.hidden) return
       meta.data.forEach((bar: any, idx: number) => {
-        const raw = chart.data.datasets[i].data[idx] as number
+        const item = top15.value[idx]
+        if (!item) return
         ctx.save()
         ctx.fillStyle = '#8D9398'
         ctx.font = '11px Inter, sans-serif'
         ctx.textAlign = 'left'
         ctx.textBaseline = 'middle'
-        ctx.fillText(fmtN(raw), bar.x + 6, bar.y)
+        ctx.fillText(fmtMXN(item.valorPromedio), bar.x + 6, bar.y)
         ctx.restore()
       })
     })
@@ -28,13 +43,15 @@ const horizLabelPlugin = {
 }
 
 const chartData = computed(() => ({
-  labels: props.items.map((b) => b.banco),
+  labels: top15.value.map(nombreEstado),
   datasets: [
     {
       label: 'Avalúos',
-      data: props.items.map((b) => b.count),
-      backgroundColor: props.items.map((_, i) => (i === 0 ? '#0875E3' : i < 3 ? '#52BCF5' : '#484848')),
-      barThickness: 26,
+      data: top15.value.map((e) => e.count),
+      backgroundColor: top15.value.map((_, i) =>
+        i === 0 ? '#0875E3' : i < 3 ? '#52BCF5' : '#484848'
+      ),
+      barThickness: 18,
       borderRadius: 4,
       borderSkipped: false as const,
     },
@@ -45,7 +62,7 @@ const options = {
   indexAxis: 'y' as const,
   responsive: true,
   maintainAspectRatio: false,
-  layout: { padding: { right: 72 } },
+  layout: { padding: { right: 120 } },
   plugins: {
     legend: { display: false },
     tooltip: {
@@ -69,7 +86,7 @@ const options = {
         color: '#8D9398',
         font: { family: 'Inter, sans-serif', size: 11 },
         padding: 8,
-        callback: (value: unknown) => Number(value).toLocaleString('es-MX'),
+        callback: (v: unknown) => Number(v).toLocaleString('es-MX'),
       },
     },
     y: {
@@ -86,9 +103,9 @@ const options = {
 </script>
 
 <template>
-  <div class="relative h-[380px]">
+  <div class="relative h-[460px]">
     <ClientOnly>
-      <Bar :data="chartData" :options="options" :plugins="[horizLabelPlugin]" />
+      <Bar :data="chartData" :options="options" :plugins="[promedioPlugin]" />
     </ClientOnly>
   </div>
 </template>

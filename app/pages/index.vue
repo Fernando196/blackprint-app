@@ -3,17 +3,21 @@
   import ChartCard from '~/components/charts/ChartCard.vue'
   import DonutChart from '~/components/charts/DonutChart.vue'
   import HorizontalBarChart from '~/components/charts/HorizontalBarChart.vue'
+  import RankingEstados from '~/components/charts/RankingEstados.vue'
+  import TopEstados from '~/components/tabla/TopEstados.vue'
   import FilterBar from '~/components/ui/FilterBar.vue'
   import KpiCard from '~/components/ui/KpiCard.vue'
   import PageHeader from '~/components/ui/PageHeader.vue'
   import Mapfilter from '~/components/map/Mapfilter.vue'
   import { fmtMXN, fmtN } from '~/helpers/common'
-  import type { TipoItem, ClaseItem } from '~/types/metricas'
+  import type { TipoItem, ClaseItem, BancoItem } from '~/types/metricas'
+  import type { PorEstado } from '~/types/por_estado.type'
 
   const MAX_VISIBLE = 5000
 
   const { points, isLoading, hasError, puntosFiltrados } = useMapa()
   const { getTipoInmueble, getClaseConstruccion } = useCatalog()
+  const { data: estadosData } = useFetch<PorEstado[]>('/api/estados')
 
   const mapaExpandido = ref(false)
 
@@ -66,14 +70,25 @@
     { label: 'Valor mediano', value: fmtMXN(metricasFiltradas.value.valorMediano) },
     { label: 'Promedio por m²', value: fmtMXN(metricasFiltradas.value.m2Promedio), unit: '/ m²' },
   ])
+  const porBanco = computed<BancoItem[]>(() => {
+    const bancoMap = new Map<string, number>()
+    for (const p of puntosFiltrados.value) {
+      if (p.banco) bancoMap.set(p.banco, (bancoMap.get(p.banco) ?? 0) + 1)
+    }
+    return [...bancoMap]
+      .map(([banco, count]) => ({ banco, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10)
+  })
+
   function handleChangeExpanded(expanded: boolean) {
     mapaExpandido.value = expanded
   }
 </script>
 
 <template>
-  <div class="flex h-[calc(100vh-72px)] flex-col">
-    <div class="flex flex-1 overflow-hidden">
+  <div class="flex h-full flex-col overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div class="flex h-[calc(100vh-72px)] shrink-0 overflow-hidden">
       <aside
         v-if="!mapaExpandido"
         class="border-border bg-bg flex w-1/3 shrink-0 [scrollbar-width:none] flex-col overflow-y-auto border-r [&::-webkit-scrollbar]:hidden"
@@ -104,7 +119,7 @@
           </ChartCard>
 
           <ChartCard title="Top 10 instituciones">
-            <!-- <HorizontalBarChart :items="porBanco" /> -->
+            <HorizontalBarChart :items="porBanco" />
           </ChartCard>
         </div>
       </aside>
@@ -118,6 +133,15 @@
           :show-expanded="true"
           @on-change-expanded="handleChangeExpanded"
         />
+      </div>
+    </div>
+
+    <div v-if="!mapaExpandido" class="border-border border-t">
+      <div class="grid grid-cols-2 gap-(--s-5) p-(--s-6)">
+        <ChartCard title="Top 15 estados · Volumen de avalúos">
+          <RankingEstados :items="estadosData ?? []" />
+        </ChartCard>
+        <TopEstados :items="estadosData ?? []" />
       </div>
     </div>
   </div>
