@@ -23,6 +23,13 @@
         >
           Tabla
         </NuxtLink>
+        <NuxtLink
+          to="/rankings"
+          class="text-fg-muted hover:text-fg rounded-full px-(--s-4) py-[6px] font-sans text-sm font-medium transition-colors"
+          active-class="bg-surface-raised text-fg"
+        >
+          Rankings
+        </NuxtLink>
       </nav>
     </div>
   </header>
