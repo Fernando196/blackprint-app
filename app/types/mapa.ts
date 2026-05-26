@@ -9,6 +9,8 @@ export type MapPoint = {
   colonia: string
   municipio: string
   entidad: string
+  banco?: string
+  grupo?: string
 }
 
 export type MapState = {
@@ -20,9 +22,11 @@ export type MapState = {
 export type MapFilters = {
   tipo: string
   clase: string
-  entidad: string
+  entidad: string | null
   valorMin: number | null
   valorMax: number | null
+  banco?: string | null
+  grupo?: string | null
 }
 
 export type EstadoGeoProperties = {

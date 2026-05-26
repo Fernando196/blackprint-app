@@ -1,5 +1,5 @@
 export interface ItemCatalogo {
-  id: number
+  id: number | string
   nombre: string
 }
 

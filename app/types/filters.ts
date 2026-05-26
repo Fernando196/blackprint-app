@@ -7,5 +7,5 @@ export type FiltrosOpciones = {
 
 export type DropdownOption = {
   label: string
-  value: number
+  value: number | string
 }

@@ -3,4 +3,5 @@ export interface PorEstado {
   count: number
   valorPromedio: number
   valorMediano: number
+  nombreEntidad: string
 }
