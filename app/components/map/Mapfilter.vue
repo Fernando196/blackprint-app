@@ -1,7 +1,6 @@
 <script setup lang="ts">
   import type { MapPoint } from '~/types/mapa'
   import AvaluosMap from './AvaluosMap.vue'
-  import MapFilterPanel from './MapFilterPanel.vue'
   import EstadoPanel from './EstadoPanel.vue'
 
   interface Props {
@@ -62,12 +61,6 @@
 <template>
   <div class="h-full w-full">
     <AvaluosMap :points="points" :conteo-por-entidad="conteoPorEntidad" />
-
-    <MapFilterPanel
-      v-if="mapaExpandido"
-      :result-count="filterPoints.length"
-      :total-count="points.length"
-    />
 
     <EstadoPanel
       v-if="estadoSeleccionado"
