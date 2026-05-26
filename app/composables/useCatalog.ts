@@ -6,14 +6,14 @@ import type { DropdownOption } from '~/types/filters'
 export function useCatalog(): {
   getEstado: (id: number) => Estado | undefined
   getMunicipio: (idEstado: number, codMunicipio: number) => Municipio | undefined
-  getTipoInmueble: (id: number) => string
-  getClaseConstruccion: (id: number) => string
-  getConservacion: (id: number) => string
-  getProximidad: (id: number) => string
-  getVigilancia: (id: number) => string
-  getVialidades: (id: number) => string
-  getAlumbrado: (id: number) => string
-  getEquipamiento: (id: number) => string
+  getTipoInmueble: (id: string | number) => string
+  getClaseConstruccion: (id: string | number) => string
+  getConservacion: (id: string | number) => string
+  getProximidad: (id: string | number) => string
+  getVigilancia: (id: string | number) => string
+  getVialidades: (id: string | number) => string
+  getAlumbrado: (id: string | number) => string
+  getEquipamiento: (id: string | number) => string
   tiposOptions: ComputedRef<DropdownOption[]>
   clasesOptions: ComputedRef<DropdownOption[]>
   estadosOptions: ComputedRef<DropdownOption[]>
@@ -29,36 +29,44 @@ export function useCatalog(): {
     return store.municipios.find((m) => m.idEstado === idEstado && m.id === codMunicipio)
   }
 
-  function getTipoInmueble(id: number): string {
-    return store.tiposInmueble.find((i) => i.id === id)?.nombre ?? ''
+  function getTipoInmueble(id: string | number): string {
+    const idStr = id.toString()
+    return store.tiposInmueble.find((i) => i.id.toString() === idStr)?.nombre ?? ''
   }
 
-  function getClaseConstruccion(id: number): string {
-    return store.clasesConstruccion.find((i) => i.id === id)?.nombre ?? ''
+  function getClaseConstruccion(id: string | number): string {
+    const idStr = id.toString()
+    return store.clasesConstruccion.find((i) => i.id.toString() === idStr)?.nombre ?? ''
   }
 
-  function getConservacion(id: number): string {
-    return store.estadosConservacion.find((i) => i.id === id)?.nombre ?? ''
+  function getConservacion(id: string | number): string {
+    const idStr = id.toString()
+    return store.estadosConservacion.find((i) => i.id.toString() === idStr)?.nombre ?? ''
   }
 
-  function getProximidad(id: number): string {
-    return store.referenciasProximidad.find((i) => i.id === id)?.nombre ?? ''
+  function getProximidad(id: string | number): string {
+    const idStr = id.toString()
+    return store.referenciasProximidad.find((i) => i.id.toString() === idStr)?.nombre ?? ''
   }
 
-  function getVigilancia(id: number): string {
-    return store.vigilancias.find((i) => i.id === id)?.nombre ?? ''
+  function getVigilancia(id: string | number): string {
+    const idStr = id.toString()
+    return store.vigilancias.find((i) => i.id.toString() === idStr)?.nombre ?? ''
   }
 
-  function getVialidades(id: number): string {
-    return store.vialidades.find((i) => i.id === id)?.nombre ?? ''
+  function getVialidades(id: string | number): string {
+    const idStr = id.toString()
+    return store.vialidades.find((i) => i.id.toString() === idStr)?.nombre ?? ''
   }
 
-  function getAlumbrado(id: number): string {
-    return store.alumbradosPublicos.find((i) => i.id === id)?.nombre ?? ''
+  function getAlumbrado(id: string | number): string {
+    const idStr = id.toString()
+    return store.alumbradosPublicos.find((i) => i.id.toString() === idStr)?.nombre ?? ''
   }
 
-  function getEquipamiento(id: number): string {
-    return store.nivelesEquipamiento.find((i) => i.id === id)?.nombre ?? ''
+  function getEquipamiento(id: string | number): string {
+    const idStr = id.toString()
+    return store.nivelesEquipamiento.find((i) => i.id.toString() === idStr)?.nombre ?? ''
   }
 
   const tiposOptions = computed<DropdownOption[]>(() =>
