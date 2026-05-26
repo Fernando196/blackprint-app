@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import CatalogDropdown from '~/components/ui/CatalogDropdown.vue'
   import type { DropdownOption } from '~/types/filters'
 
   const props = defineProps<{
@@ -13,27 +14,30 @@
   }>()
 
   const totalPaginas = computed(() => Math.max(1, Math.ceil(props.total / props.limite)))
-  const desde = computed(() => props.total === 0 ? 0 : (props.pagina - 1) * props.limite + 1)
+  const desde = computed(() => (props.total === 0 ? 0 : (props.pagina - 1) * props.limite + 1))
   const hasta = computed(() => Math.min(props.pagina * props.limite, props.total))
 
   const puedeAnterior = computed(() => props.pagina > 1)
   const puedeSiguiente = computed(() => props.pagina < totalPaginas.value)
 
   const LIMITE_OPTIONS: DropdownOption[] = [
-    { label: '25', value: 25 },
-    { label: '50', value: 50 },
-    { label: '100', value: 100 },
+    { label: '25', value: '25' },
+    { label: '50', value: '50' },
+    { label: '100', value: '100' },
   ]
 
-  const localLimite = ref<number | null>(props.limite)
+  const localLimite = ref<string | null>(String(props.limite))
 
   watch(
     () => props.limite,
-    (v) => { localLimite.value = v },
+    (v) => {
+      localLimite.value = String(v)
+    }
   )
 
   watch(localLimite, (val) => {
-    if (val !== null && val !== props.limite) emit('cambiarLimite', val)
+    const num = val !== null ? Number(val) : null
+    if (num !== null && num !== props.limite) emit('cambiarLimite', num)
   })
 </script>
 
