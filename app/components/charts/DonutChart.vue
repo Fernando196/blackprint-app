@@ -12,8 +12,7 @@ const chartData = computed(() => ({
     {
       data: props.items.map((t) => t.count),
       backgroundColor: PALETTE,
-      borderColor: '#2F2F2F',
-      borderWidth: 3,
+      borderWidth: 0,
       hoverOffset: 6,
     },
   ],
@@ -31,7 +30,9 @@ const options = {
         font: { family: 'Inter, sans-serif', size: 12 },
         padding: 14,
         usePointStyle: true,
-        pointStyleWidth: 8,
+        pointStyle: 'circle',
+        boxWidth: 8,
+        boxHeight: 8,
       },
     },
     tooltip: {
