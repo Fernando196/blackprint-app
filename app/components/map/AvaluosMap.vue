@@ -6,13 +6,9 @@
   const props = defineProps<{
     points: MapPoint[]
     conteoPorEntidad?: Record<string, number>
-    activeEntidad?: string | null
   }>()
 
-  const emit = defineEmits<{
-    'entidad-seleccionada': [entidadId: string | null]
-  }>()
-
+  const filterStore = useFilterStore()
   const MEXICO_CENTER = [23.6345, -102.5528] as [number, number]
   const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
   const ATTRIBUTION = '&copy; OpenStreetMap contributors &copy; CARTO'
@@ -20,8 +16,8 @@
 
   // Colores literales del brand kit (--depth-7, --depth-5, --blue-p)
   const STYLE_DEFAULT = { fillColor: '#484848', fillOpacity: 0.3, color: '#8d9398', weight: 0.5 }
-  const STYLE_HOVER   = { fillColor: '#0875e3', fillOpacity: 0.35, color: '#8d9398', weight: 1 }
-  const STYLE_ACTIVE  = { fillColor: '#0875e3', fillOpacity: 0.5,  color: '#0875e3', weight: 1.5 }
+  const STYLE_HOVER = { fillColor: '#0875e3', fillOpacity: 0.35, color: '#8d9398', weight: 1 }
+  const STYLE_ACTIVE = { fillColor: '#0875e3', fillOpacity: 0.5, color: '#0875e3', weight: 1.5 }
 
   let mapInstance: LeafletMap | null = null
   let clusterGroup: any = null
@@ -34,7 +30,11 @@
   // ─── Helpers ─────────────────────────────────────────────────────────────
 
   const fmtMXN = (n: number) =>
-    new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(n)
+    new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      maximumFractionDigits: 0,
+    }).format(n)
 
   const fmtN = (n: number) => n.toLocaleString('es-MX')
 
@@ -74,7 +74,7 @@
     } else {
       // MultiPolygon: usar el anillo exterior del polígono más grande
       const sorted = [...(geom.coordinates as number[][][][])].sort(
-        (a, b) => (b[0]?.length ?? 0) - (a[0]?.length ?? 0),
+        (a, b) => (b[0]?.length ?? 0) - (a[0]?.length ?? 0)
       )
       ring = (sorted[0]?.[0] ?? []) as number[][]
     }
@@ -86,7 +86,8 @@
 
   // Escala con raíz cuadrada para mejor distribución visual
   function bubbleSize(count: number, maxCount: number): number {
-    const MIN = 28, MAX = 58
+    const MIN = 28,
+      MAX = 58
     if (maxCount === 0) return MIN
     return Math.round(MIN + Math.sqrt(count / maxCount) * (MAX - MIN))
   }
@@ -106,30 +107,45 @@
       window.L = Object.create(mod.default || mod)
     }
 
-    if (geoLayer) { mapInstance.removeLayer(geoLayer); geoLayer = null }
+    if (geoLayer) {
+      mapInstance.removeLayer(geoLayer)
+      geoLayer = null
+    }
 
     geoLayer = (window.L as any).geoJSON(geoData.value as EstadoGeoCollection, {
       style: geoFeatureStyle,
       onEachFeature(feature: any, layer: any) {
         const { name, entidadId, count } = feature.properties
 
-        layer.bindTooltip(tooltipHtml(name, count), { sticky: true, opacity: 1, className: 'bp-tooltip' })
+        layer.bindTooltip(tooltipHtml(name, count), {
+          sticky: true,
+          opacity: 1,
+          className: 'bp-tooltip',
+        })
 
         layer.on('mouseover', () => {
           if (entidadId !== selectedEntidadId) layer.setStyle(STYLE_HOVER)
         })
         layer.on('mouseout', () => {
-          layer.setStyle(entidadId === selectedEntidadId && selectedEntidadId ? STYLE_ACTIVE : STYLE_DEFAULT)
+          layer.setStyle(
+            entidadId === selectedEntidadId && selectedEntidadId ? STYLE_ACTIVE : STYLE_DEFAULT
+          )
         })
         layer.on('click', () => {
           if (selectedEntidadId === entidadId) {
             selectedEntidadId = null
             geoLayer.resetStyle()
-            emit('entidad-seleccionada', null)
+            filterStore.onChangeFilters({
+              ...filterStore.filters,
+              entidad: null,
+            })
           } else {
             selectedEntidadId = entidadId
             geoLayer.resetStyle()
-            emit('entidad-seleccionada', entidadId)
+            filterStore.onChangeFilters({
+              ...filterStore.filters,
+              entidad: entidadId,
+            })
           }
         })
       },
@@ -165,11 +181,13 @@
     }
 
     // Usar conteo completo del padre si está disponible; si no, contar desde props.points
-    const counts: Record<string, number> = props.conteoPorEntidad ?? (() => {
-      const acc: Record<string, number> = {}
-      for (const p of props.points) acc[p.entidad] = (acc[p.entidad] ?? 0) + 1
-      return acc
-    })()
+    const counts: Record<string, number> =
+      props.conteoPorEntidad ??
+      (() => {
+        const acc: Record<string, number> = {}
+        for (const p of props.points) acc[p.entidad] = (acc[p.entidad] ?? 0) + 1
+        return acc
+      })()
     const maxCount = Object.values(counts).length ? Math.max(...Object.values(counts)) : 0
 
     stateMarkersGroup = (window.L as any).layerGroup()
@@ -199,7 +217,10 @@
         const next = selectedEntidadId === entidadId ? null : entidadId
         selectedEntidadId = next
         geoLayer?.resetStyle()
-        emit('entidad-seleccionada', next)
+        filterStore.onChangeFilters({
+          ...filterStore.filters,
+          entidad: next,
+        })
         if (next) zoomToEntidad(next)
         buildStateMarkers()
       })
@@ -274,9 +295,11 @@
 
     if (zoom <= ZOOM_THRESHOLD) {
       if (clusterGroup && mapInstance.hasLayer(clusterGroup)) mapInstance.removeLayer(clusterGroup)
-      if (stateMarkersGroup && !mapInstance.hasLayer(stateMarkersGroup)) stateMarkersGroup.addTo(mapInstance)
+      if (stateMarkersGroup && !mapInstance.hasLayer(stateMarkersGroup))
+        stateMarkersGroup.addTo(mapInstance)
     } else {
-      if (stateMarkersGroup && mapInstance.hasLayer(stateMarkersGroup)) mapInstance.removeLayer(stateMarkersGroup)
+      if (stateMarkersGroup && mapInstance.hasLayer(stateMarkersGroup))
+        mapInstance.removeLayer(stateMarkersGroup)
       if (clusterGroup && !mapInstance.hasLayer(clusterGroup)) mapInstance.addLayer(clusterGroup)
     }
   }
@@ -299,12 +322,12 @@
   watch(
     () => props.points,
     () => buildCluster(),
-    { deep: true },
+    { deep: true }
   )
 
   watch(
     () => props.conteoPorEntidad,
-    () => buildStateMarkers(),
+    () => buildStateMarkers()
   )
 
   watch(geoData, (val) => {
@@ -315,12 +338,12 @@
   })
 
   watch(
-    () => props.activeEntidad,
+    () => filterStore.filters.entidad,
     (val) => {
       selectedEntidadId = val || null
       if (geoLayer) geoLayer.resetStyle()
       if (stateMarkersGroup) buildStateMarkers()
-    },
+    }
   )
 
   onUnmounted(() => {
