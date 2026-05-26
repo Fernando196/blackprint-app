@@ -93,7 +93,8 @@ watch(messages, async () => {
                 : 'rounded-bl-sm bg-[var(--depth-7)] text-[var(--depth-2)]',
             ]"
           >
-            {{ msg.content }}
+            <template v-if="msg.role === 'user'">{{ msg.content }}</template>
+            <span v-else v-html="msg.content.replace(/\n/g, '<br>')" />
           </div>
         </div>
 

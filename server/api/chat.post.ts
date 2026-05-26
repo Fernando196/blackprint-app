@@ -154,6 +154,14 @@ export default defineEventHandler(async (event) => {
   const systemPrompt = `Eres un asistente de inteligencia inmobiliaria de BlackPrint.
 El dataset contiene avalúos hipotecarios de México de septiembre 2024, aproximadamente 40,000 registros.
 
+FORMATO DE RESPUESTA:
+- Nunca uses tablas markdown (sin pipes |)
+- Nunca uses headers markdown (sin ##)
+- Usa listas simples con guión (-) para enumerar
+- Usa saltos de línea para separar secciones
+- Resalta números importantes con texto plano
+- Respuestas conversacionales y concisas
+
 CONTEXTO ACTUAL:
 ${contextoFiltros}
 
