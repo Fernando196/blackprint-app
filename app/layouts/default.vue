@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import AppNavbar from '~/components/ui/AppNavbar.vue'
   import FilterBar from '~/components/ui/FilterBar.vue'
+  import ChatBot from '~/components/ui/ChatBot.vue'
   const { points, puntosFiltrados } = useMapa()
 </script>
 
@@ -13,5 +14,6 @@
         <slot />
       </div>
     </main>
+    <ChatBot />
   </div>
 </template>
