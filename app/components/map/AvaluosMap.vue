@@ -6,6 +6,7 @@
   const props = defineProps<{
     points: MapPoint[]
     conteoPorEntidad?: Record<string, number>
+    expanded?: boolean
   }>()
 
   const filterStore = useFilterStore()
@@ -364,6 +365,14 @@
     () => filterStore.resetMapTrigger,
     () => {
       if (mapInstance) mapInstance.setView(MEXICO_CENTER, 5)
+    }
+  )
+
+  watch(
+    () => props.expanded,
+    async () => {
+      await nextTick()
+      mapInstance?.invalidateSize()
     }
   )
 

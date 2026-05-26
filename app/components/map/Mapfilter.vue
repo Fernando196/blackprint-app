@@ -60,7 +60,7 @@
 </script>
 <template>
   <div class="h-full w-full">
-    <AvaluosMap :points="points" :conteo-por-entidad="conteoPorEntidad" />
+    <AvaluosMap :points="points" :conteo-por-entidad="conteoPorEntidad" :expanded="mapaExpandido" />
 
     <EstadoPanel
       v-if="estadoSeleccionado"
