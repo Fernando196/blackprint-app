@@ -231,3 +231,15 @@ Los JSONs viven en `server/data/` y solo son accesibles via API routes de Nuxt �
 - Tabla de datos con filtros y paginación: 1 hora
 - Store global, filtros y refactors de arquitectura: 1 hora
 - Deploy en Vercel y README: 15 min
+
+### Hora adicional (fuera del límite)
+
+Se dedicó 1.5 hora extra para implementar el Nivel 4 — chat de IA conectado a los datos reales. Se tomó esta decisión porque la funcionalidad aportaba valor significativo al producto y se consideró importante demostrar la integración con la API de Anthropic y el manejo de tools para reducir alucinaciones.
+
+Durante esta hora se trabajó en:
+
+- Arquitectura del chat con tools de Anthropic
+- Endpoints especializados para consulta de datos
+- Conexión del bot con los filtros activos de la app
+- Capacidad del bot para aplicar filtros desde el chat
+- Ajustes manuales de UI y formato de respuestas
