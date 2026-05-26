@@ -2,36 +2,15 @@
   import AvaluosMap from '~/components/map/AvaluosMap.vue'
   import MapFilterPanel from '~/components/map/MapFilterPanel.vue'
   import EstadoPanel from '~/components/map/EstadoPanel.vue'
-  import type { MapFilters } from '~/types/mapa'
   import type { PorEstado } from '~/types/por_estado.type'
 
   const MAX_VISIBLE = 5000
 
-  const { points, isLoading, hasError } = useMapa()
+  const { points, isLoading, hasError, puntosFiltrados } = useMapa()
   const { data: estadosData } = useFetch<PorEstado[]>('/api/estados')
   const { getEstado } = useCatalog()
 
-  const filtrosActivos = ref<MapFilters>({
-    tipo: '',
-    clase: '',
-    entidad: '',
-    valorMin: null,
-    valorMax: null,
-  })
-
   const estadoSeleccionado = ref<string | null>(null)
-
-  const puntosFiltrados = computed(() => {
-    const { tipo, clase, entidad, valorMin, valorMax } = filtrosActivos.value
-    return points.value.filter((p) => {
-      if (tipo && p.tipo !== tipo) return false
-      if (clase && p.clase !== clase) return false
-      if (entidad && p.entidad !== entidad) return false
-      if (valorMin !== null && p.valorConcluido < valorMin) return false
-      if (valorMax !== null && p.valorConcluido > valorMax) return false
-      return true
-    })
-  })
 
   const puntosVisibles = computed(() => puntosFiltrados.value.slice(0, MAX_VISIBLE))
 
@@ -52,18 +31,8 @@
     for (const p of points.value.filter((p) => p.entidad === entidad)) {
       tipoMap.set(p.tipo, (tipoMap.get(p.tipo) ?? 0) + 1)
     }
-    return [...tipoMap]
-      .map(([tipo, count]) => ({ tipo, count }))
-      .sort((a, b) => b.count - a.count)
+    return [...tipoMap].map(([tipo, count]) => ({ tipo, count })).sort((a, b) => b.count - a.count)
   })
-
-  function onFiltrosAplicados(filtros: MapFilters): void {
-    filtrosActivos.value = filtros
-  }
-
-  function onFiltrosLimpiados(): void {
-    filtrosActivos.value = { tipo: '', clase: '', entidad: '', valorMin: null, valorMax: null }
-  }
 
   function onEntidadSeleccionada(entidadId: string | null): void {
     estadoSeleccionado.value = entidadId
@@ -85,12 +54,10 @@
     <MapFilterPanel
       :result-count="puntosFiltrados.length"
       :total-count="points.length"
-      @apply="onFiltrosAplicados"
-      @clear="onFiltrosLimpiados"
     />
 
     <EstadoPanel
-      v-if="estadoSeleccionado && estadoData"
+      v-if="estadoSeleccionado !== null"
       :nombre="nombreEstado"
       :estado-data="estadoData"
       :por-tipo="porTipoEstado"

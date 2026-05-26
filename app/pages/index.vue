@@ -1,6 +1,4 @@
 <script setup lang="ts">
-  import AvaluosMap from '~/components/map/AvaluosMap.vue'
-  import MapFilterPanel from '~/components/map/MapFilterPanel.vue'
   import BarChart from '~/components/charts/BarChart.vue'
   import ChartCard from '~/components/charts/ChartCard.vue'
   import DonutChart from '~/components/charts/DonutChart.vue'
@@ -8,54 +6,18 @@
   import FilterBar from '~/components/ui/FilterBar.vue'
   import KpiCard from '~/components/ui/KpiCard.vue'
   import PageHeader from '~/components/ui/PageHeader.vue'
-  import type { MapFilters } from '~/types/mapa'
-  import type { TipoItem, ClaseItem } from '~/composables/useMetricas'
+  import Mapfilter from '~/components/map/Mapfilter.vue'
+  import { fmtMXN, fmtN } from '~/helpers/common'
+  import type { TipoItem, ClaseItem } from '~/types/metricas'
 
   const MAX_VISIBLE = 5000
 
-  const { points, isLoading, hasError } = useMapa()
-  const { porBanco } = useMetricas()
+  const { points, isLoading, hasError, puntosFiltrados } = useMapa()
+  const { getTipoInmueble, getClaseConstruccion } = useCatalog()
 
   const mapaExpandido = ref(false)
 
-  const filtrosActivos = ref<MapFilters>({
-    tipo: '',
-    clase: '',
-    entidad: '',
-    valorMin: null,
-    valorMax: null,
-  })
-
-  const puntosFiltrados = computed(() => {
-    const { tipo, clase, entidad, valorMin, valorMax } = filtrosActivos.value
-    return points.value.filter((p) => {
-      if (tipo && p.tipo !== tipo) return false
-      if (clase && p.clase !== clase) return false
-      if (entidad && p.entidad !== entidad) return false
-      if (valorMin !== null && p.valorConcluido < valorMin) return false
-      if (valorMax !== null && p.valorConcluido > valorMax) return false
-      return true
-    })
-  })
-
   const puntosVisibles = computed(() => puntosFiltrados.value.slice(0, MAX_VISIBLE))
-
-  const conteoPorEntidad = computed<Record<string, number>>(() => {
-    const acc: Record<string, number> = {}
-    for (const p of puntosFiltrados.value) {
-      acc[p.entidad] = (acc[p.entidad] ?? 0) + 1
-    }
-    return acc
-  })
-
-  const fmtMXN = (n: number) =>
-    new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN',
-      maximumFractionDigits: 0,
-    }).format(n)
-
-  const fmtN = (n: number) => new Intl.NumberFormat('es-MX').format(n)
 
   const metricasFiltradas = computed(() => {
     const pts = puntosFiltrados.value
@@ -89,12 +51,12 @@
       valorPromedio: sum / n,
       valorMediano: med,
       m2Promedio: pts.reduce((a, p) => a + p.valorM2, 0) / n,
-      porTipo: ([...tipoMap].map(([tipo, count]) => ({ tipo, count })) as TipoItem[]).sort(
-        (a, b) => b.count - a.count
-      ),
-      porClase: ([...claseMap].map(([clase, count]) => ({ clase, count })) as ClaseItem[]).sort(
-        (a, b) => b.count - a.count
-      ),
+      porTipo: [...tipoMap]
+        .map(([id, count]) => ({ tipo: getTipoInmueble(id) || id, count }))
+        .sort((a, b) => b.count - a.count) as TipoItem[],
+      porClase: [...claseMap]
+        .map(([id, count]) => ({ clase: getClaseConstruccion(id) || id, count }))
+        .sort((a, b) => b.count - a.count) as ClaseItem[],
     }
   })
 
@@ -104,31 +66,13 @@
     { label: 'Valor mediano', value: fmtMXN(metricasFiltradas.value.valorMediano) },
     { label: 'Promedio por m²', value: fmtMXN(metricasFiltradas.value.m2Promedio), unit: '/ m²' },
   ])
-
-  function onFiltrosAplicados(filtros: MapFilters): void {
-    filtrosActivos.value = filtros
-  }
-
-  function onFiltrosLimpiados(): void {
-    filtrosActivos.value = { tipo: '', clase: '', entidad: '', valorMin: null, valorMax: null }
-  }
-
-  function onEntidadSeleccionada(entidadId: string | null): void {
-    filtrosActivos.value = { ...filtrosActivos.value, entidad: entidadId ?? '' }
+  function handleChangeExpanded(expanded: boolean) {
+    mapaExpandido.value = expanded
   }
 </script>
 
 <template>
   <div class="flex h-[calc(100vh-72px)] flex-col">
-    <FilterBar
-      v-if="!mapaExpandido"
-      :value="filtrosActivos"
-      :result-count="puntosFiltrados.length"
-      :total-count="points.length"
-      @apply="onFiltrosAplicados"
-      @clear="onFiltrosLimpiados"
-    />
-
     <div class="flex flex-1 overflow-hidden">
       <aside
         v-if="!mapaExpandido"
@@ -160,53 +104,20 @@
           </ChartCard>
 
           <ChartCard title="Top 10 instituciones">
-            <HorizontalBarChart :items="porBanco" />
+            <!-- <HorizontalBarChart :items="porBanco" /> -->
           </ChartCard>
         </div>
       </aside>
 
       <div class="relative flex-1">
-        <AvaluosMap
+        <Mapfilter
           :points="puntosVisibles"
-          :conteo-por-entidad="conteoPorEntidad"
-          :active-entidad="filtrosActivos.entidad || null"
-          @entidad-seleccionada="onEntidadSeleccionada"
+          :filter-points="puntosFiltrados"
+          :is-loading="isLoading"
+          :has-error="hasError"
+          :show-expanded="true"
+          @on-change-expanded="handleChangeExpanded"
         />
-
-        <MapFilterPanel
-          v-if="mapaExpandido"
-          :initial-filters="filtrosActivos"
-          :result-count="puntosFiltrados.length"
-          :total-count="points.length"
-          @apply="onFiltrosAplicados"
-          @clear="onFiltrosLimpiados"
-        />
-
-        <button
-          class="bg-surface text-fg-muted hover:text-fg absolute top-(--s-5) right-(--s-5) z-1000 flex items-center gap-2 rounded-full px-(--s-4) py-1.75 font-sans text-sm font-medium shadow-[var(--shadow-4)] transition-colors"
-          @click="mapaExpandido = !mapaExpandido"
-        >
-          <img
-            :src="mapaExpandido ? '/icons/shrink.svg' : '/icons/fullscreen.svg'"
-            class="h-4 w-4 opacity-60 invert"
-            alt=""
-          />
-          {{ mapaExpandido ? 'Ver dashboard' : 'Expandir mapa' }}
-        </button>
-
-        <div
-          v-if="isLoading"
-          class="bg-bg/80 absolute inset-0 z-500 flex items-center justify-center"
-        >
-          <p class="text-fg-muted font-sans text-sm">Cargando puntos...</p>
-        </div>
-
-        <div
-          v-if="hasError"
-          class="bg-bg/80 absolute inset-0 z-500 flex items-center justify-center"
-        >
-          <p class="text-fg-muted font-sans text-sm">Error al cargar los datos del mapa.</p>
-        </div>
       </div>
     </div>
   </div>
