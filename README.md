@@ -220,13 +220,14 @@ Los JSONs viven en `server/data/` y solo son accesibles via API routes de Nuxt �
 
 ## Tiempo dedicado
 
-**Total: ~8 horas**
+**Total: ~10 horas**
 
 - Análisis del reto y planeación del stack: 30 min
 - Pipeline de procesamiento de datos (script Node + catálogos): 1.5 horas
 - Setup de Nuxt + brand kit + API routes: 45 min
 - Dashboard con KPIs y gráficas: 1 hora
 - Mapa interactivo con clustering y GeoJSON de estados: 2 horas
+- Manipulacion de catalogos y geojson para insertar datos: 1 horas
 - Tabla de datos con filtros y paginación: 1 hora
 - Store global, filtros y refactors de arquitectura: 1 hora
 - Deploy en Vercel y README: 15 min
