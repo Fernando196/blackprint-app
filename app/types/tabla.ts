@@ -22,6 +22,8 @@ export type TablaFiltros = {
   entidad: string
   valorMin: number | null
   valorMax: number | null
+  banco: string
+  grupo: string
 }
 
 export type TablaState = {

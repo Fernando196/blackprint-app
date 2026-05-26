@@ -25,6 +25,8 @@ export function useTabla(): {
     entidad: '',
     valorMin: null,
     valorMax: null,
+    banco: '',
+    grupo: '',
   })
 
   const pagina = ref(1)
@@ -40,6 +42,8 @@ export function useTabla(): {
     ...(filtros.value.entidad && { entidad: filtros.value.entidad }),
     ...(filtros.value.valorMin !== null && { valorMin: filtros.value.valorMin }),
     ...(filtros.value.valorMax !== null && { valorMax: filtros.value.valorMax }),
+    ...(filtros.value.banco !== null && { banco: filtros.value.banco }),
+    ...(filtros.value.grupo !== null && { grupo: filtros.value.grupo }),
     pagina: pagina.value,
     limite: limite.value,
   }))
@@ -63,7 +67,15 @@ export function useTabla(): {
   }
 
   function limpiarFiltros(): void {
-    filtros.value = { tipo: '', clase: '', entidad: '', valorMin: null, valorMax: null }
+    filtros.value = {
+      tipo: '',
+      clase: '',
+      entidad: '',
+      valorMin: null,
+      valorMax: null,
+      banco: '',
+      grupo: '',
+    }
     pagina.value = 1
   }
 

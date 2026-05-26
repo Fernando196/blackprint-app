@@ -7,6 +7,8 @@ export default defineEventHandler(async (event) => {
   const tipo = query.tipo as string | undefined
   const clase = query.clase as string | undefined
   const entidad = query.entidad as string | undefined
+  const banco = query.banco as string | undefined
+  const grupo = query.grupo as string | undefined
   const valorMin = query.valorMin ? Number(query.valorMin) : undefined
   const valorMax = query.valorMax ? Number(query.valorMax) : undefined
   const limite = query.limite ? Number(query.limite) : 100
@@ -42,6 +44,12 @@ export default defineEventHandler(async (event) => {
   }
   if (valorMax !== undefined) {
     registros = registros.filter((r) => (r.valorConcluido as number) <= valorMax)
+  }
+  if (banco) {
+    registros = registros.filter((r) => r.banco === banco)
+  }
+  if (grupo) {
+    registros = registros.filter((r) => r.grupo === grupo)
   }
 
   const total = registros.length

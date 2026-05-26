@@ -175,6 +175,7 @@ const dataTabla = avaluos.map((a) => ({
   supTerreno: a.supTerreno,
   recamaras: a.recamaras,
   banco: a.banco,
+  grupo: a.grupo,
   fechaAvaluo: a.fechaAvaluo,
 }))
 
