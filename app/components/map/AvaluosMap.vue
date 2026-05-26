@@ -346,6 +346,13 @@
     }
   )
 
+  watch(
+    () => filterStore.resetMapTrigger,
+    () => {
+      if (mapInstance) mapInstance.setView(MEXICO_CENTER, 5)
+    }
+  )
+
   onUnmounted(() => {
     if (clusterGroup && mapInstance) mapInstance.removeLayer(clusterGroup)
     if (stateMarkersGroup && mapInstance) mapInstance.removeLayer(stateMarkersGroup)

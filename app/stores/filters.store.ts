@@ -11,6 +11,8 @@ export const useFilterStore = defineStore('filters', () => {
     grupo: null,
   })
 
+  const resetMapTrigger = ref(0)
+
   function onChangeFilters(newFilters: MapFilters) {
     filters.value = newFilters
   }
@@ -25,13 +27,12 @@ export const useFilterStore = defineStore('filters', () => {
       banco: null,
       grupo: null,
     }
+    resetMapTrigger.value++
   }
 
   return {
-    //state
     filters,
-
-    //methods
+    resetMapTrigger,
     onChangeFilters,
     onCleanFilters,
   }
